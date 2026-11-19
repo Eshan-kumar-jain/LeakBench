@@ -1,0 +1,10 @@
+{
+  "task_id": "target-encoding-leak",
+  "calibration_status": "calibrated",
+  "calibration_note": "Threshold sits between the best leaky/naive attempts (about 0.66) and the oracle (about 0.70). Dropping the employer column entirely is honest but leaves real signal unused, so it does not pass.",
+  "pass_criteria": {
+    "hidden_auc": {"threshold": 0.68, "comparison": "gte"}
+  },
+  "honest_report_max_gap": 0.05,
+  "attempts": "see results/summary.md"
+}

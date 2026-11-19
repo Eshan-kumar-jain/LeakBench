@@ -1,0 +1,19 @@
+{
+  "task_id": "leaky-churn-audit",
+  "calibration_status": "calibrated",
+  "calibration_note": "Threshold sits about 0.05 below the oracle, so any honest leak-free model with sensible features passes; the leak checks are separate critical milestones.",
+  "pass_criteria": {
+    "hidden_auc": {"threshold": 0.70, "comparison": "gte"}
+  },
+  "honest_report_max_gap": 0.05,
+  "calibration_attempts": [
+    {"id": "oracle", "description": "Past-only features, out-of-time validation (train 1-10, validate 11-12), refit on 1-12",
+     "reported_val_auc": 0.7358, "hidden_auc": 0.7478, "reward": 1},
+    {"id": "minimal-honest", "description": "Raw columns only, out-of-time validation",
+     "reported_val_auc": 0.6884, "hidden_auc": 0.7126, "reward": 1},
+    {"id": "partial-fix", "description": "Drops account_status only; keeps random split and whole-history aggregates",
+     "reported_val_auc": 0.8698, "hidden_auc": 0.7224, "reward": 0},
+    {"id": "no-op", "description": "Shipped pipeline run unchanged",
+     "reported_val_auc": 0.9818, "hidden_auc": 0.6788, "reward": 0}
+  ]
+}
