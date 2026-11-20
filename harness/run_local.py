@@ -18,6 +18,7 @@ import json
 import os
 import shutil
 import subprocess
+import sys
 import tempfile
 import time
 from pathlib import Path
@@ -33,7 +34,8 @@ def run_trial(task: str, attempt: str, seed: int) -> dict:
         shutil.copytree(task_dir / "environment" / "data", app / "data")
         shutil.copytree(task_dir / "environment" / "pipeline", app / "pipeline")
         env = {**os.environ, "APP_DIR": str(app), "LOG_DIR": str(logs),
-               "TASK_DIR": str(task_dir), "SEED": str(seed)}
+               "TASK_DIR": str(task_dir), "SEED": str(seed),
+               "PYTHON": sys.executable}  # same Python everywhere, incl. Windows where python3 may not exist
 
         start = time.time()
         agent = subprocess.run(["bash", str(ROOT / "authoring" / "attempts" / task / f"{attempt}.sh")],

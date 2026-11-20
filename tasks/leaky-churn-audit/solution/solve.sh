@@ -6,4 +6,4 @@ APP_DIR="${APP_DIR:-/app}"
 
 cp "${SCRIPT_DIR}/features.py" "${APP_DIR}/pipeline/features.py"
 cp "${SCRIPT_DIR}/train.py" "${APP_DIR}/pipeline/train.py"
-cd "${APP_DIR}/pipeline" && python3 train.py
+cd "${APP_DIR}/pipeline" && "${PYTHON:-python3}" train.py
