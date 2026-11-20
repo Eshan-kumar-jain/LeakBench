@@ -67,7 +67,7 @@ def main():
           "Overstatement = reported validation AUC minus AUC on the hidden data (positive = the pipeline flattered itself).", "",
           "## By task and attempt", "", table.to_markdown(index=False), "",
           "## Overall by attempt", "", overall[["pass rate [95% CI]"]].to_markdown(), ""]
-    (ROOT / "results" / "summary.md").write_text("\n".join(md))
+    (ROOT / "results" / "summary.md").write_text("\n".join(md), encoding="utf-8")
     print("\n".join(md))
 
 

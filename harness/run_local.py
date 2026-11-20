@@ -26,6 +26,10 @@ from pathlib import Path
 ROOT = Path(__file__).resolve().parents[1]
 TASKS = ["leaky-churn-audit", "target-encoding-leak", "patient-split-leak"]
 
+# On Windows, a bare "bash" can resolve to C:\Windows\System32\bash.exe (the WSL launcher)
+# before PATH is searched. shutil.which follows PATH order, so from Git Bash it finds Git's bash.
+BASH = shutil.which("bash") or "bash"
+
 
 def run_trial(task: str, attempt: str, seed: int) -> dict:
     task_dir = ROOT / "tasks" / task
@@ -38,16 +42,21 @@ def run_trial(task: str, attempt: str, seed: int) -> dict:
                "PYTHON": sys.executable}  # same Python everywhere, incl. Windows where python3 may not exist
 
         start = time.time()
-        agent = subprocess.run(["bash", str(ROOT / "authoring" / "attempts" / task / f"{attempt}.sh")],
+        agent = subprocess.run([BASH, str(ROOT / "authoring" / "attempts" / task / f"{attempt}.sh")],
                                env=env, capture_output=True, text=True)
         agent_sec = time.time() - start
-        verify = subprocess.run(["bash", str(task_dir / "tests" / "test.sh")],
+        verify = subprocess.run([BASH, str(task_dir / "tests" / "test.sh")],
                                 env=env, capture_output=True, text=True)
 
         reward = json.loads((logs / "reward.json").read_text()) if (logs / "reward.json").exists() else {}
         criteria = json.loads((logs / "result.json").read_text())["criteria"] if (logs / "result.json").exists() else []
         metrics_path = app / "artifacts" / "metrics.json"
         reported = json.loads(metrics_path.read_text()).get("val_auc") if metrics_path.exists() else None
+
+    if not reward:  # nothing graded: show why, so failures are never silent
+        for name, proc in (("attempt", agent), ("verifier", verify)):
+            tail = (proc.stderr or proc.stdout or "").strip().splitlines()[-6:]
+            print(f"  [{task}/{attempt}] {name} exit {proc.returncode}: " + " | ".join(tail))
 
     hidden = reward.get("hidden_auc")
     return {
@@ -74,6 +83,7 @@ def main():
     p.add_argument("--out", default=str(ROOT / "results" / "results.jsonl"))
     args = p.parse_args()
 
+    print(f"using bash: {BASH}\nusing python: {sys.executable}")
     out = Path(args.out)
     out.parent.mkdir(parents=True, exist_ok=True)
     with out.open("w") as f:
